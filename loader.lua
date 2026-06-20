@@ -12,7 +12,7 @@ local targetGui = pcall(function() return CoreGui.Name end) and CoreGui or playe
 if targetGui:FindFirstChild("HoufilLoader") then targetGui.HoufilLoader:Destroy() end
 
 -- /!\ METTRE L'IP DE TON VPS / BOT ICI /!\
-local API_URL = "http://TON_IP_VPS_ICI:8080/api/auth"
+local API_URL = "http://0.0.0.0:8080"
 
 local screenGui = Instance.new("ScreenGui", targetGui)
 screenGui.Name = "HoufilLoader"
