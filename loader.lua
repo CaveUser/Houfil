@@ -1,6 +1,6 @@
 -- ======================================================
 -- 👑 Houfil - LOADER (AUTH & LAUNCHER) V0.0.1
--- Dynamic Theme | Auto-Login | Floating Cards | Fixed
+-- True Floating UI | Smooth Shine | Auto-Login | Fixed URL
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -16,7 +16,7 @@ local targetGui = pcall(function() return CoreGui.Name end) and CoreGui or playe
 if targetGui:FindFirstChild("HoufilLoader") then targetGui.HoufilLoader:Destroy() end
 
 -- ==========================================
--- 1. CONFIGURATION & LECTURE DU THÈME
+-- 1. CONFIGURATION & FONCTIONS
 -- ==========================================
 local API_URL = "http://145.239.69.111:20350/api/auth"
 local KeySaveFile = "Houfil_SavedKey.txt"
@@ -43,23 +43,15 @@ local Themes = {
 if readfile and isfile and isfile(ConfigFileName) then
     pcall(function()
         local data = HttpService:JSONDecode(readfile(ConfigFileName))
-        if data.Theme and Themes[data.Theme] then
-            CurrentSettings.Theme = data.Theme
-        end
+        if data.Theme and Themes[data.Theme] then CurrentSettings.Theme = data.Theme end
     end)
 end
 
 local Theme = Themes[CurrentSettings.Theme]
-
 local getAsset = getcustomasset or getsynasset
 
 local function downloadAsset(fileName, url)
-    if not isfile or not isfile(fileName) then
-        pcall(function()
-            local r = game:HttpGet(url)
-            if writefile then writefile(fileName, r) end
-        end)
-    end
+    if not isfile or not isfile(fileName) then pcall(function() local r = game:HttpGet(url); if writefile then writefile(fileName, r) end end) end
     if getAsset and isfile and isfile(fileName) then return getAsset(fileName) end
     return ""
 end
@@ -104,19 +96,22 @@ Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(45, 45, 50)
 local uiScale = Instance.new("UIScale", mainFrame); uiScale.Scale = 0.5
 
--- Brillance Title (Ralentie)
+-- Brillance Title (Corrigée et Douce)
 local titleLbl = Instance.new("TextLabel", mainFrame)
 titleLbl.Size = UDim2.new(1, 0, 0, 40); titleLbl.Position = UDim2.new(0, 0, 0, 15)
 titleLbl.BackgroundTransparency = 1; titleLbl.Text = "HOUFIL KEY"
-titleLbl.Font = Enum.Font.GothamBold; titleLbl.TextSize = 22; titleLbl.TextColor3 = Theme.Accent
+titleLbl.Font = Enum.Font.GothamBold; titleLbl.TextSize = 24; titleLbl.TextColor3 = Theme.Accent
 
 local shineGrad = Instance.new("UIGradient", titleLbl)
 shineGrad.Rotation = 45; shineGrad.Offset = Vector2.new(-1, 0)
 shineGrad.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) })
 task.spawn(function() 
-    while task.wait(5) do 
+    while true do 
         shineGrad.Offset = Vector2.new(-1, 0)
-        TweenService:Create(shineGrad, TweenInfo.new(2.5, Enum.EasingStyle.Linear), {Offset = Vector2.new(1, 0)}):Play() 
+        local tw = TweenService:Create(shineGrad, TweenInfo.new(3.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Offset = Vector2.new(1, 0)})
+        tw:Play()
+        tw.Completed:Wait()
+        task.wait(1)
     end 
 end)
 
@@ -133,12 +128,12 @@ footer.BackgroundTransparency = 1
 local versionLbl = Instance.new("TextLabel", footer)
 versionLbl.Size = UDim2.new(0, 100, 1, 0); versionLbl.Position = UDim2.new(0, 15, 0, 0)
 versionLbl.BackgroundTransparency = 1; versionLbl.Text = "V0.0.1"
-versionLbl.Font = Enum.Font.GothamBold; versionLbl.TextSize = 11; versionLbl.TextColor3 = Theme.TextDim; versionLbl.TextXAlignment = Enum.TextXAlignment.Left
+versionLbl.Font = Enum.Font.GothamBold; versionLbl.TextSize = 12; versionLbl.TextColor3 = Theme.TextDim; versionLbl.TextXAlignment = Enum.TextXAlignment.Left
 
 local linksLbl = Instance.new("TextLabel", footer)
 linksLbl.Size = UDim2.new(0, 250, 1, 0); linksLbl.Position = UDim2.new(1, -265, 0, 0)
 linksLbl.BackgroundTransparency = 1; linksLbl.Text = "houfil.fr  |  discord.gg/houfil"
-linksLbl.Font = Enum.Font.GothamMedium; linksLbl.TextSize = 11; linksLbl.TextColor3 = Theme.Accent; linksLbl.TextXAlignment = Enum.TextXAlignment.Right
+linksLbl.Font = Enum.Font.GothamMedium; linksLbl.TextSize = 12; linksLbl.TextColor3 = Theme.Accent; linksLbl.TextXAlignment = Enum.TextXAlignment.Right
 
 -- ==========================================
 -- CONTENEUR 1 : KEY SYSTEM
@@ -162,19 +157,25 @@ keyBox.ClearTextOnFocus = false
 local verifyBtn = Instance.new("TextButton", keyContainer)
 verifyBtn.Size = UDim2.new(0, 145, 0, 38); verifyBtn.Position = UDim2.new(0.5, -150, 0, 75)
 verifyBtn.BackgroundColor3 = Theme.Accent
-verifyBtn.Text = "Verify Key"; verifyBtn.Font = Enum.Font.GothamBold; verifyBtn.TextSize = 13; verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-if Theme.Accent == Color3.fromRGB(255, 255, 255) then verifyBtn.TextColor3 = Color3.fromRGB(20, 20, 20) end -- Fix texte si accent blanc
+verifyBtn.Text = "Verify Key"; verifyBtn.Font = Enum.Font.GothamBold; verifyBtn.TextSize = 14; verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+if Theme.Accent == Color3.fromRGB(255, 255, 255) then verifyBtn.TextColor3 = Color3.fromRGB(20, 20, 20) end 
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 6)
 
+-- BOUTON GET KEY AMÉLIORÉ
 local getKeyBtn = Instance.new("TextButton", keyContainer)
 getKeyBtn.Size = UDim2.new(0, 145, 0, 38); getKeyBtn.Position = UDim2.new(0.5, 5, 0, 75)
 getKeyBtn.BackgroundColor3 = Theme.Elem
-getKeyBtn.Text = "Get Key"; getKeyBtn.Font = Enum.Font.GothamBold; getKeyBtn.TextSize = 13; getKeyBtn.TextColor3 = Theme.Text
+getKeyBtn.Text = "  Get Key"; getKeyBtn.Font = Enum.Font.GothamBold; getKeyBtn.TextSize = 14; getKeyBtn.TextColor3 = Theme.Text
 Instance.new("UICorner", getKeyBtn).CornerRadius = UDim.new(0, 6)
-Instance.new("UIStroke", getKeyBtn).Color = Color3.fromRGB(45, 45, 50)
+Instance.new("UIStroke", getKeyBtn).Color = Color3.fromRGB(80, 80, 90) -- Stroke plus clair pour contraste
+
+local getIcon = Instance.new("ImageLabel", getKeyBtn)
+getIcon.Size = UDim2.new(0, 16, 0, 16); getIcon.Position = UDim2.new(0, 30, 0.5, -8)
+getIcon.BackgroundTransparency = 1; getIcon.Image = "rbxassetid://10002373478" -- Icône "Lien"
+getIcon.ImageColor3 = Theme.Text
 
 -- ==========================================
--- CONTENEUR 2 : LAUNCHER (JEUX FLOTTANTS)
+-- CONTENEUR 2 : LAUNCHER (JEUX FLOTTANTS VRAIS)
 -- ==========================================
 local launcherContainer = Instance.new("ScrollingFrame", mainFrame)
 launcherContainer.Size = UDim2.new(1, -20, 1, -110); launcherContainer.Position = UDim2.new(1, 0, 0, 75)
@@ -188,13 +189,16 @@ gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local floatOffset = 0
 local function CreateGameTile(name, imageAsset, scriptUrl)
+    -- Le container Cell est fixe dans la grille
     local cell = Instance.new("Frame", launcherContainer)
     cell.BackgroundTransparency = 1
     
+    -- La Card est libre de bouger à l'intérieur de Cell (Vrai Flottement)
     local card = Instance.new("TextButton", cell)
     card.Size = UDim2.new(1, 0, 1, 0); card.Position = UDim2.new(0, 0, 0, 0)
     card.Text = ""; card.BackgroundColor3 = Theme.Elem
     Instance.new("UICorner", card).CornerRadius = UDim.new(0, 10)
+    card.AnchorPoint = Vector2.new(0.5, 0.5); card.Position = UDim2.new(0.5, 0, 0.5, 0) -- Centré pour la rotation
     local cardStroke = Instance.new("UIStroke", card); cardStroke.Color = Color3.fromRGB(45, 45, 50)
     
     local img = Instance.new("ImageLabel", card)
@@ -213,11 +217,15 @@ local function CreateGameTile(name, imageAsset, scriptUrl)
     local title = Instance.new("TextLabel", card)
     title.Size = UDim2.new(1, -10, 0.35, 0); title.Position = UDim2.new(0, 5, 0.65, 0)
     title.BackgroundTransparency = 1; title.Text = name; title.TextXAlignment = Enum.TextXAlignment.Center
-    title.Font = Enum.Font.GothamBold; title.TextSize = 12; title.TextColor3 = Theme.Text; title.TextWrapped = true
+    title.Font = Enum.Font.GothamBold; title.TextSize = 13; title.TextColor3 = Theme.Text; title.TextWrapped = true
     
-    -- Animation Flottante
-    floatOffset = floatOffset + 0.5
-    local floatTween = TweenService:Create(card, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {Position = UDim2.new(0, 0, 0, -6)})
+    -- VRAIE ANIMATION FLOTTANTE (Haut/Bas + Légère inclinaison)
+    floatOffset = floatOffset + 1
+    card.Rotation = -1.5
+    local floatTween = TweenService:Create(card, TweenInfo.new(3.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+        Position = UDim2.new(0.5, 0, 0.5, -6),
+        Rotation = 1.5
+    })
     task.delay(floatOffset, function() floatTween:Play() end)
     
     card.MouseEnter:Connect(function() PlaySound("Hover"); TweenService:Create(cardStroke, TweenInfo.new(0.3), {Color = Theme.Accent}):Play() end)
@@ -232,9 +240,16 @@ local function CreateGameTile(name, imageAsset, scriptUrl)
         task.wait(0.6)
         screenGui:Destroy()
         
-        -- Lancement sécurisé
-        local s, r = pcall(function() return game:HttpGet(scriptUrl, true) end)
-        if s and r then loadstring(r)() else warn("Houfil: Failed to load script.") end
+        -- Lancement SÉCURISÉ
+        task.spawn(function()
+            local s, r = pcall(function() return game:HttpGet(scriptUrl, true) end)
+            if s and r then 
+                local func, err = loadstring(r)
+                if func then func() else warn("Houfil: Syntax error -> ", err) end
+            else 
+                warn("Houfil: Failed to load script. Connection error.") 
+            end
+        end)
     end)
 end
 
@@ -261,10 +276,8 @@ local function VerifyKeyProcess(keyToVerify)
                 statusLbl.TextColor3 = Color3.fromRGB(0, 255, 100)
                 PlaySound("Success")
                 
-                -- SAUVEGARDE DE LA CLÉ LOCALEMENT
+                -- SAUVEGARDE
                 if writefile then pcall(function() writefile(KeySaveFile, keyToVerify) end) end
-                
-                -- SAUVEGARDE DU TOKEN POUR LE JEU FINAL
                 getgenv().Houfil_Session_Token = data.session_token
                 
                 task.wait(0.8)
@@ -276,12 +289,12 @@ local function VerifyKeyProcess(keyToVerify)
                 TweenService:Create(keyContainer, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(-1, 0, 0, 80)}):Play()
                 TweenService:Create(launcherContainer, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0, 10, 0, 75)}):Play()
                 
-                -- CHARGEMENT DES CARTES DE JEU
-                local baseUrl = "https://raw.githubusercontent.com/CaveUser/Houfil/main/Script/"
-                CreateGameTile("+1 Speed Keyboard Escape", ImgSpeed, baseUrl .. "SpeedKeyBoard.lua")
+                -- CHARGEMENT DES CARTES DE JEU (URL CORRIGÉE AVEC Script%20)
+                local baseUrl = "https://raw.githubusercontent.com/CaveUser/Houfil/main/Script%20/"
+                CreateGameTile("+1 Speed Keyboard", ImgSpeed, baseUrl .. "SpeedKeyBoard.lua")
                 CreateGameTile("Houfil Private", ImgPrivate, baseUrl .. "HoufilPrivate.lua")
             else
-                -- Clé invalide ou expirée : On la supprime des fichiers si elle existait
+                -- Clé invalide ou expirée
                 if isfile and isfile(KeySaveFile) and delfile then pcall(function() delfile(KeySaveFile) end) end
                 statusLbl.Text = data.message; statusLbl.TextColor3 = Color3.fromRGB(255, 80, 80); PlaySound("Error")
             end
@@ -339,10 +352,9 @@ titleLbl.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserI
 UIS.InputChanged:Connect(function(input) if dragS and input.UserInputType == Enum.UserInputType.MouseMovement then local delta = input.Position - dragP; mainFrame.Position = UDim2.new(startP.X.Scale, startP.X.Offset + delta.X, startP.Y.Scale, startP.Y.Offset + delta.Y) end end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragS = false end end)
 
--- Animation d'apparition au lancement
 ToggleLoader()
 
--- Vérification de l'Auto-Login (Sauvegarde)
+-- Auto-Login
 task.spawn(function()
     task.wait(0.8) 
     if readfile and isfile and isfile(KeySaveFile) then
