@@ -1,6 +1,6 @@
 -- ======================================================
 -- 👑 Houfil - LOADER (AUTH & LAUNCHER) V0.0.1
--- Compact UI | Floating Cards | Auto-Login | Custom Assets
+-- Compact UI | Floating Cards | Auto-Login | Fixed Startup
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -11,6 +11,7 @@ local UIS = game:GetService("UserInputService")
 local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
+local mouse = player:GetMouse()
 local targetGui = pcall(function() return CoreGui.Name end) and CoreGui or player:WaitForChild("PlayerGui")
 
 if targetGui:FindFirstChild("HoufilLoader") then targetGui.HoufilLoader:Destroy() end
@@ -21,7 +22,7 @@ if targetGui:FindFirstChild("HoufilLoader") then targetGui.HoufilLoader:Destroy(
 local API_URL = "http://145.239.69.111:20350/api/auth"
 local KeySaveFile = "Houfil_SavedKey.txt"
 
--- Thème sombre par défaut (Tu pourras le lier à tes settings plus tard)
+-- Thème sombre par défaut
 local Theme = {
     Accent = Color3.fromRGB(0, 120, 255),
     Main = Color3.fromRGB(15, 16, 20),
@@ -73,13 +74,14 @@ screenGui.Name = "HoufilLoader"
 screenGui.DisplayOrder = 1000
 
 local mainFrame = Instance.new("CanvasGroup", screenGui)
-mainFrame.Size = UDim2.new(0, 440, 0, 260) -- Plus compact et symétrique
+mainFrame.Size = UDim2.new(0, 440, 0, 260) 
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Theme.Main
-mainFrame.BackgroundTransparency = 0.2 -- Glassmorphism
+mainFrame.BackgroundTransparency = 0.2 
 mainFrame.BorderSizePixel = 0
 mainFrame.GroupTransparency = 1 
+mainFrame.Visible = false -- Masqué par défaut (le Toggle l'affichera)
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(45, 45, 50)
 local uiScale = Instance.new("UIScale", mainFrame); uiScale.Scale = 0.5
@@ -94,9 +96,9 @@ local shineGrad = Instance.new("UIGradient", titleLbl)
 shineGrad.Rotation = 45; shineGrad.Offset = Vector2.new(-1, 0)
 shineGrad.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) })
 task.spawn(function() 
-    while task.wait(5) do -- Attend plus longtemps
+    while task.wait(5) do 
         shineGrad.Offset = Vector2.new(-1, 0)
-        TweenService:Create(shineGrad, TweenInfo.new(2.5, Enum.EasingStyle.Linear), {Offset = Vector2.new(1, 0)}):Play() -- Glisse plus lentement
+        TweenService:Create(shineGrad, TweenInfo.new(2.5, Enum.EasingStyle.Linear), {Offset = Vector2.new(1, 0)}):Play() 
     end 
 end)
 
@@ -161,17 +163,15 @@ launcherContainer.BackgroundTransparency = 1; launcherContainer.ScrollBarThickne
 launcherContainer.Visible = false
 
 local gridLayout = Instance.new("UIGridLayout", launcherContainer)
-gridLayout.CellSize = UDim2.new(0, 185, 0, 120) -- Plus petit pour tenir à deux
+gridLayout.CellSize = UDim2.new(0, 185, 0, 120) 
 gridLayout.CellPadding = UDim2.new(0, 15, 0, 15)
 gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local floatOffset = 0
 local function CreateGameTile(name, imageAsset, scriptUrl)
-    -- Conteneur invisible pour la grille
     local cell = Instance.new("Frame", launcherContainer)
     cell.BackgroundTransparency = 1
     
-    -- La carte visible (qui va flotter)
     local card = Instance.new("TextButton", cell)
     card.Size = UDim2.new(1, 0, 1, 0); card.Position = UDim2.new(0, 0, 0, 0)
     card.Text = ""; card.BackgroundColor3 = Theme.Elem
@@ -181,7 +181,7 @@ local function CreateGameTile(name, imageAsset, scriptUrl)
     local img = Instance.new("ImageLabel", card)
     img.Size = UDim2.new(1, 0, 0.65, 0); img.Position = UDim2.new(0, 0, 0, 0)
     img.BackgroundTransparency = 1; img.ScaleType = Enum.ScaleType.Crop
-    img.Image = imageAsset ~= "" and imageAsset or "rbxassetid://10629237000" -- Fallback si l'image n'est pas dispo
+    img.Image = imageAsset ~= "" and imageAsset or "rbxassetid://10629237000"
     Instance.new("UICorner", img).CornerRadius = UDim.new(0, 10)
     
     local imgFix = Instance.new("Frame", img)
@@ -295,7 +295,7 @@ end)
 -- ==========================================
 -- 4. ANIMATIONS & AUTO-LOGIN
 -- ==========================================
-local isMenuOpen = true
+local isMenuOpen = false -- CORRIGÉ : L'UI commence bien masquée et fermée
 local function ToggleLoader()
     isMenuOpen = not isMenuOpen
     if isMenuOpen then
@@ -312,7 +312,7 @@ local function ToggleLoader()
 end
 
 UIS.InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == (Enum.KeyCode[CurrentSettings.ToggleKey] or Enum.KeyCode.Insert) then ToggleLoader() end
+    if not gp and input.KeyCode == Enum.KeyCode.Insert then ToggleLoader() end
 end)
 
 local dragS, dragP, startP
@@ -325,13 +325,12 @@ ToggleLoader()
 
 -- Vérification de l'Auto-Login (Sauvegarde)
 task.spawn(function()
-    task.wait(1) -- Petit délai pour laisser l'animation se finir
+    task.wait(0.8) -- Petit délai pour laisser l'animation se finir proprement
     if readfile and isfile and isfile(KeySaveFile) then
         pcall(function()
             local savedKey = readfile(KeySaveFile)
             if savedKey and savedKey ~= "" then
                 keyBox.Text = savedKey
-                statusLbl.Text = "Saved key found. Authenticating..."
                 VerifyKeyProcess(savedKey)
             end
         end)
