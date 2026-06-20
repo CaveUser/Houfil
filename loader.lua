@@ -1,6 +1,6 @@
 -- ======================================================
 -- 👑 Houfil - LOADER (AUTH & LAUNCHER) V0.0.1
--- Compact UI | Floating Cards | Auto-Login | Fixed Startup
+-- Dynamic Theme | Auto-Login | Floating Cards | Fixed
 -- ======================================================
 
 local Players = game:GetService("Players")
@@ -11,25 +11,45 @@ local UIS = game:GetService("UserInputService")
 local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
-local mouse = player:GetMouse()
 local targetGui = pcall(function() return CoreGui.Name end) and CoreGui or player:WaitForChild("PlayerGui")
 
 if targetGui:FindFirstChild("HoufilLoader") then targetGui.HoufilLoader:Destroy() end
 
 -- ==========================================
--- 1. CONFIGURATION & FONCTIONS
+-- 1. CONFIGURATION & LECTURE DU THÈME
 -- ==========================================
 local API_URL = "http://145.239.69.111:20350/api/auth"
 local KeySaveFile = "Houfil_SavedKey.txt"
+local ConfigFileName = "Houfil_Dev_Settings.json"
 
--- Thème sombre par défaut
-local Theme = {
-    Accent = Color3.fromRGB(0, 120, 255),
-    Main = Color3.fromRGB(15, 16, 20),
-    Elem = Color3.fromRGB(25, 26, 30),
-    Text = Color3.fromRGB(250, 250, 250),
-    TextDim = Color3.fromRGB(150, 150, 160)
+local CurrentSettings = { Theme = "Obsidian" }
+
+local Themes = {
+    ["None"]       = { Accent = Color3.fromRGB(255, 255, 255), Main = Color3.fromRGB(15, 16, 20), Elem = Color3.fromRGB(25, 26, 30), Text = Color3.fromRGB(250,250,250), TextDim = Color3.fromRGB(150,150,160) },
+    ["White"]      = { Accent = Color3.fromRGB(0, 120, 255),   Main = Color3.fromRGB(245, 245, 245), Elem = Color3.fromRGB(255, 255, 255), Text = Color3.fromRGB(20, 20, 20), TextDim = Color3.fromRGB(100, 100, 100) },
+    ["Black"]      = { Accent = Color3.fromRGB(240, 240, 240), Main = Color3.fromRGB(12, 12, 12),    Elem = Color3.fromRGB(18, 18, 18),    Text = Color3.fromRGB(240, 240, 240), TextDim = Color3.fromRGB(140, 140, 140) },
+    ["Diamond"]    = { Accent = Color3.fromRGB(0, 200, 255),   Main = Color3.fromRGB(10, 15, 25),    Elem = Color3.fromRGB(15, 22, 35),    Text = Color3.fromRGB(240, 250, 255), TextDim = Color3.fromRGB(100, 150, 200) },
+    ["Sakura"]     = { Accent = Color3.fromRGB(220, 90, 130),  Main = Color3.fromRGB(250, 242, 245), Elem = Color3.fromRGB(255, 248, 250), Text = Color3.fromRGB(140, 50, 80),   TextDim = Color3.fromRGB(180, 100, 120) },
+    ["Emerald"]    = { Accent = Color3.fromRGB(80, 255, 150),  Main = Color3.fromRGB(12, 25, 18),    Elem = Color3.fromRGB(18, 35, 25),    Text = Color3.fromRGB(200, 255, 220), TextDim = Color3.fromRGB(120, 180, 140) },
+    ["Forest"]     = { Accent = Color3.fromRGB(50, 160, 80),   Main = Color3.fromRGB(8, 15, 10),     Elem = Color3.fromRGB(12, 22, 15),    Text = Color3.fromRGB(180, 220, 190), TextDim = Color3.fromRGB(100, 140, 110) },
+    ["Ruby"]       = { Accent = Color3.fromRGB(255, 80, 80),   Main = Color3.fromRGB(25, 12, 12),    Elem = Color3.fromRGB(35, 18, 18),    Text = Color3.fromRGB(255, 220, 220), TextDim = Color3.fromRGB(180, 120, 120) },
+    ["Blood"]      = { Accent = Color3.fromRGB(180, 20, 20),   Main = Color3.fromRGB(12, 4, 4),      Elem = Color3.fromRGB(18, 6, 6),      Text = Color3.fromRGB(220, 160, 160), TextDim = Color3.fromRGB(140, 80, 80) },
+    ["Obsidian"]   = { Accent = Color3.fromRGB(160, 100, 255), Main = Color3.fromRGB(12, 10, 18),    Elem = Color3.fromRGB(18, 15, 25),    Text = Color3.fromRGB(230, 220, 255), TextDim = Color3.fromRGB(140, 120, 180) },
+    ["Banania"]    = { Accent = Color3.fromRGB(255, 200, 60),  Main = Color3.fromRGB(22, 20, 12),    Elem = Color3.fromRGB(30, 28, 18),    Text = Color3.fromRGB(255, 245, 200), TextDim = Color3.fromRGB(180, 160, 120) },
+    ["Sand"]       = { Accent = Color3.fromRGB(180, 120, 70),  Main = Color3.fromRGB(240, 230, 215), Elem = Color3.fromRGB(245, 240, 225), Text = Color3.fromRGB(90, 60, 40),    TextDim = Color3.fromRGB(140, 110, 90) }
 }
+
+-- CHARGEMENT DYNAMIQUE DU THÈME SAUVEGARDÉ
+if readfile and isfile and isfile(ConfigFileName) then
+    pcall(function()
+        local data = HttpService:JSONDecode(readfile(ConfigFileName))
+        if data.Theme and Themes[data.Theme] then
+            CurrentSettings.Theme = data.Theme
+        end
+    end)
+end
+
+local Theme = Themes[CurrentSettings.Theme]
 
 local getAsset = getcustomasset or getsynasset
 
@@ -40,9 +60,7 @@ local function downloadAsset(fileName, url)
             if writefile then writefile(fileName, r) end
         end)
     end
-    if getAsset and isfile and isfile(fileName) then
-        return getAsset(fileName)
-    end
+    if getAsset and isfile and isfile(fileName) then return getAsset(fileName) end
     return ""
 end
 
@@ -74,14 +92,14 @@ screenGui.Name = "HoufilLoader"
 screenGui.DisplayOrder = 1000
 
 local mainFrame = Instance.new("CanvasGroup", screenGui)
-mainFrame.Size = UDim2.new(0, 440, 0, 260) 
+mainFrame.Size = UDim2.new(0, 440, 0, 260)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Theme.Main
 mainFrame.BackgroundTransparency = 0.2 
 mainFrame.BorderSizePixel = 0
 mainFrame.GroupTransparency = 1 
-mainFrame.Visible = false -- Masqué par défaut (le Toggle l'affichera)
+mainFrame.Visible = false 
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(45, 45, 50)
 local uiScale = Instance.new("UIScale", mainFrame); uiScale.Scale = 0.5
@@ -145,6 +163,7 @@ local verifyBtn = Instance.new("TextButton", keyContainer)
 verifyBtn.Size = UDim2.new(0, 145, 0, 38); verifyBtn.Position = UDim2.new(0.5, -150, 0, 75)
 verifyBtn.BackgroundColor3 = Theme.Accent
 verifyBtn.Text = "Verify Key"; verifyBtn.Font = Enum.Font.GothamBold; verifyBtn.TextSize = 13; verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+if Theme.Accent == Color3.fromRGB(255, 255, 255) then verifyBtn.TextColor3 = Color3.fromRGB(20, 20, 20) end -- Fix texte si accent blanc
 Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 6)
 
 local getKeyBtn = Instance.new("TextButton", keyContainer)
@@ -207,7 +226,7 @@ local function CreateGameTile(name, imageAsset, scriptUrl)
     card.MouseButton1Click:Connect(function()
         PlaySound("Open"); AnimateClick(card)
         statusLbl.Text = "Loading " .. name .. "..."
-        statusLbl.TextColor3 = Color3.fromRGB(0, 255, 150)
+        statusLbl.TextColor3 = Theme.Accent
         TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {GroupTransparency = 1, Position = UDim2.new(0.5, 0, 0.55, 0)}):Play()
         TweenService:Create(uiScale, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {Scale = 0.5}):Play()
         task.wait(0.6)
@@ -295,7 +314,7 @@ end)
 -- ==========================================
 -- 4. ANIMATIONS & AUTO-LOGIN
 -- ==========================================
-local isMenuOpen = false -- CORRIGÉ : L'UI commence bien masquée et fermée
+local isMenuOpen = false 
 local function ToggleLoader()
     isMenuOpen = not isMenuOpen
     if isMenuOpen then
@@ -325,7 +344,7 @@ ToggleLoader()
 
 -- Vérification de l'Auto-Login (Sauvegarde)
 task.spawn(function()
-    task.wait(0.8) -- Petit délai pour laisser l'animation se finir proprement
+    task.wait(0.8) 
     if readfile and isfile and isfile(KeySaveFile) then
         pcall(function()
             local savedKey = readfile(KeySaveFile)
